@@ -28,7 +28,7 @@
 
 .nav-links {
   display: flex;
-  gap: 0.6rem;
+  gap: 0.45rem;
   align-items: center;
 }
 
@@ -40,10 +40,10 @@
 
 .desktop-link-scroll {
   display: flex;
-  gap: 0.45rem;
+  gap: 0.3rem;
   align-items: center;
   overflow-x: auto;
-  max-width: 56vw;
+  max-width: 48vw;
   padding-bottom: 2px;
   scrollbar-width: thin;
 }
@@ -52,8 +52,8 @@
   color: white;
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.82rem;
-  padding: 0.38rem 0.62rem;
+  font-size: 0.78rem;
+  padding: 0.32rem 0.52rem;
   border-radius: 6px;
   transition: 0.3s;
   white-space: nowrap;
