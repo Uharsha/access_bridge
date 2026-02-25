@@ -24,6 +24,7 @@ export default function StudentList({ title, fetchFn }) {
   const [bulkLoading, setBulkLoading] = useState(false);
   const toast = useToast();
   const initialOpenStudentId = searchParams.get("candidateId") || "";
+  const source = searchParams.get("source") || "";
 
   const refresh = useCallback(() => {
     setLoading(true);
@@ -72,6 +73,12 @@ export default function StudentList({ title, fetchFn }) {
 
   const role = (localStorage.getItem("role") || "").trim().toUpperCase();
   const isHead = role === "HEAD";
+  const closeRedirectPath =
+    source === "calendar" && initialOpenStudentId
+      ? role === "TEACHER"
+        ? "/teacher-dashboard/interview-calendar"
+        : "/head-dashboard/interview-calendar"
+      : "";
 
   const courseOptions = useMemo(() => ["ALL", ...ALL_COURSES], []);
 
@@ -237,6 +244,7 @@ export default function StudentList({ title, fetchFn }) {
         selectedIds={selectedIds}
         onToggleSelected={toggleSelected}
         initialOpenStudentId={initialOpenStudentId}
+        closeRedirectPath={closeRedirectPath}
       />
     </div>
   );

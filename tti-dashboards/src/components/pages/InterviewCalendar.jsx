@@ -75,10 +75,10 @@ export default function InterviewCalendar() {
   const handleViewDetails = (student) => {
     if (!student?._id) return;
     if (role === "TEACHER") {
-      navigate(`/teacher-dashboard/interview?candidateId=${student._id}`);
+      navigate(`/teacher-dashboard/interview?candidateId=${student._id}&source=calendar`);
       return;
     }
-    navigate(`/head-dashboard/head-accepted?candidateId=${student._id}`);
+    navigate(`/head-dashboard/head-accepted?candidateId=${student._id}&source=calendar`);
   };
 
   return (

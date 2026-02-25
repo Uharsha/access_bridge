@@ -132,9 +132,9 @@ function Navbar() {
           { to: "/head-dashboard/pending", label: "Pending" },
           { to: "/head-dashboard/head-accepted", label: "Head Accepted" },
           { to: "/head-dashboard/rejected-head", label: "Head Rejected" },
+          { to: "/head-dashboard/interview-calendar", label: "Interview Calendar" },
           { to: "/head-dashboard/rejected-teacher", label: "Teacher Rejected" },
           { to: "/head-dashboard/teacher-accepted", label: "Final Confirmed" },
-          { to: "/head-dashboard/interview-calendar", label: "Interview Calendar" },
           { to: "/head-dashboard/notifications", label: "Notifications" },
           { to: "/head-dashboard/audit-logs", label: "Audit Logs" },
           { to: "/auth?mode=create", label: "Create Account" },
@@ -142,10 +142,10 @@ function Navbar() {
       : role === "TEACHER"
         ? [
             { to: "/teacher-dashboard/head-accepted", label: "Head Accepted" },
+            { to: "/teacher-dashboard/interview-calendar", label: "Interview Calendar" },
             { to: "/teacher-dashboard/interview", label: "Waiting for Interview" },
             { to: "/teacher-dashboard/rejected-teacher", label: "Teacher Rejected" },
             { to: "/teacher-dashboard/teacher-accepted", label: "Final Confirmed" },
-            { to: "/teacher-dashboard/interview-calendar", label: "Interview Calendar" },
             { to: "/teacher-dashboard/notifications", label: "Notifications" },
             { to: "/teacher-dashboard/audit-logs", label: "Audit Logs" },
           ]
@@ -168,7 +168,11 @@ function Navbar() {
                   aria-pressed={theme === "dark"}
                   title={theme === "light" ? "Enable dark mode" : "Enable light mode"}
                 >
-                  <span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span>
+                  <span className={`theme-switch-track ${theme === "dark" ? "dark" : "light"}`} aria-hidden="true">
+                    <span className="theme-switch-icon sun">☀</span>
+                    <span className="theme-switch-icon moon">☾</span>
+                    <span className="theme-switch-thumb" />
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -292,4 +296,3 @@ const styles = {
 };
 
 export default Navbar;
-

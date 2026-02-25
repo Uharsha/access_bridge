@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import EmptyState from "./pages/EmptyState";
 import "./StudentDiv.css";
 import { useToast } from "./ui/ToastContext";
@@ -19,11 +20,13 @@ function StudentTable({
   selectedIds = [],
   onToggleSelected = () => {},
   initialOpenStudentId = "",
+  closeRedirectPath = "",
 }) {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionKey, setActionKey] = useState("");
   const autoOpenedCandidateRef = useRef("");
+  const navigate = useNavigate();
   const role = localStorage.getItem("role");
   const toast = useToast();
   const safeText = (value) => String(value || "").trim();
@@ -34,14 +37,21 @@ function StudentTable({
     return `https://wa.me/${withCountry}`;
   };
 
+  const handleCloseDetails = useCallback(() => {
+    setSelectedStudent(null);
+    if (closeRedirectPath) {
+      navigate(closeRedirectPath, { replace: true });
+    }
+  }, [closeRedirectPath, navigate]);
+
   useEffect(() => {
     if (!selectedStudent) return undefined;
     const onKeyDown = (e) => {
-      if (e.key === "Escape") setSelectedStudent(null);
+      if (e.key === "Escape") handleCloseDetails();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [selectedStudent]);
+  }, [selectedStudent, handleCloseDetails]);
 
   useEffect(() => {
     if (!initialOpenStudentId || !Array.isArray(students) || students.length === 0) return;
@@ -163,9 +173,9 @@ function StudentTable({
       ))}
 
       {selectedStudent && (
-        <div className="modalOverlay" onClick={(e) => e.target === e.currentTarget && setSelectedStudent(null)}>
+        <div className="modalOverlay" onClick={(e) => e.target === e.currentTarget && handleCloseDetails()}>
           <div className="modalContent" role="dialog" aria-modal="true" aria-labelledby="student-details-title">
-            <button type="button" onClick={() => setSelectedStudent(null)} style={styles.closeButton} aria-label="Close details">
+            <button type="button" onClick={handleCloseDetails} style={styles.closeButton} aria-label="Close details">
               x
             </button>
 
