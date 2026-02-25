@@ -437,7 +437,10 @@
   }
 
   .app-navbar {
-    height: 74px;
+    min-height: 74px;
+    height: auto;
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
 }
 
