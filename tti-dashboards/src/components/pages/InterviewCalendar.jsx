@@ -23,17 +23,53 @@ export default function InterviewCalendar() {
     return Number.isNaN(parsed.getTime()) ? null : parsed;
   };
 
-  const grouped = useMemo(() => {
+  const dayColumns = useMemo(() => {
     const now = new Date();
-    const map = new Map();
+    const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startTomorrow = new Date(startToday);
+    startTomorrow.setDate(startTomorrow.getDate() + 1);
+    const startDayAfter = new Date(startToday);
+    startDayAfter.setDate(startDayAfter.getDate() + 2);
+    const startFourthDay = new Date(startToday);
+    startFourthDay.setDate(startFourthDay.getDate() + 3);
+
+    const buckets = {
+      today: [],
+      tomorrow: [],
+      dayAfterTomorrow: [],
+    };
+
     items.forEach((item) => {
       const interviewDate = toInterviewDateTime(item?.interview?.date, item?.interview?.time);
-      if (!interviewDate || interviewDate < now) return;
-      const dateKey = interviewDate.toISOString().slice(0, 10);
-      if (!map.has(dateKey)) map.set(dateKey, []);
-      map.get(dateKey).push(item);
+      if (!interviewDate) return;
+      if (interviewDate >= startToday && interviewDate < startTomorrow) {
+        buckets.today.push(item);
+        return;
+      }
+      if (interviewDate >= startTomorrow && interviewDate < startDayAfter) {
+        buckets.tomorrow.push(item);
+        return;
+      }
+      if (interviewDate >= startDayAfter && interviewDate < startFourthDay) {
+        buckets.dayAfterTomorrow.push(item);
+      }
     });
-    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+
+    const sortByTime = (a, b) => {
+      const t1 = toInterviewDateTime(a?.interview?.date, a?.interview?.time)?.getTime() || 0;
+      const t2 = toInterviewDateTime(b?.interview?.date, b?.interview?.time)?.getTime() || 0;
+      return t1 - t2;
+    };
+
+    buckets.today.sort(sortByTime);
+    buckets.tomorrow.sort(sortByTime);
+    buckets.dayAfterTomorrow.sort(sortByTime);
+
+    return [
+      { key: "today", title: "Today", date: startToday, students: buckets.today },
+      { key: "tomorrow", title: "Tomorrow", date: startTomorrow, students: buckets.tomorrow },
+      { key: "dayAfterTomorrow", title: "Day After Tomorrow", date: startDayAfter, students: buckets.dayAfterTomorrow },
+    ];
   }, [items]);
 
   const handleViewDetails = (student) => {
@@ -50,17 +86,18 @@ export default function InterviewCalendar() {
       <h2 style={styles.title}>Interview Calendar</h2>
       {loading ? (
         <p style={styles.muted}>Loading interview slots...</p>
-      ) : grouped.length === 0 ? (
-        <div style={styles.empty}>No scheduled interviews found.</div>
       ) : (
         <div style={styles.grid}>
-          {grouped.map(([date, students]) => (
-            <section key={date} style={styles.card}>
+          {dayColumns.map((column) => (
+            <section key={column.key} style={styles.card}>
               <h3 style={styles.date}>
-                {new Date(date).toDateString()}
+                {column.title}
               </h3>
+              <small style={styles.dateSub}>{column.date.toDateString()}</small>
               <div style={styles.list}>
-                {students.map((s) => (
+                {column.students.length === 0 ? (
+                  <div style={styles.dayEmpty}>No interviews scheduled.</div>
+                ) : column.students.map((s) => (
                   <div key={s._id} style={styles.item}>
                     <strong>{s.name}</strong>
                     <span>{s.course}</span>
@@ -91,11 +128,13 @@ const styles = {
   title: { margin: "0 0 1rem", color: "var(--text-main)" },
   muted: { color: "var(--text-muted)" },
   empty: { border: "1px dashed var(--border-color)", borderRadius: 12, padding: "1.5rem", color: "var(--text-muted)", background: "var(--surface-card)" },
-  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "12px" },
+  grid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "12px" },
   card: { border: "1px solid var(--border-color)", background: "var(--surface-card)", borderRadius: 12, padding: "12px" },
   date: { margin: "0 0 10px", color: "var(--text-main)", fontSize: "1rem" },
+  dateSub: { color: "var(--text-muted)" },
   list: { display: "grid", gap: "8px" },
   item: { border: "1px solid var(--border-color)", borderRadius: 8, padding: "8px", display: "grid", gap: 3, color: "var(--text-main)" },
+  dayEmpty: { border: "1px dashed var(--border-color)", borderRadius: 8, padding: "10px", color: "var(--text-muted)", fontSize: "0.9rem" },
   platformLink: { color: "#2563eb", textDecoration: "underline", fontWeight: 600, fontSize: "0.85rem", width: "fit-content" },
   viewBtn: { marginTop: 6, border: "1px solid #c7d2fe", background: "#eef2ff", color: "#1e3a8a", borderRadius: 8, padding: "6px 10px", cursor: "pointer", fontWeight: 700, width: "fit-content" },
 };
