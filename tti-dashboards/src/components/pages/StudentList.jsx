@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import StudentTable from "../StudentTable";
 import { getNotifications, headApproveStudent, headDeleteStudent, headRejectStudent, markAllNotificationsRead } from "../../server/Api";
 import { useToast } from "../ui/ToastContext";
@@ -13,6 +14,7 @@ const ALL_COURSES = [
 const ACTION_REFRESH_DELAY_MS = 5000;
 
 export default function StudentList({ title, fetchFn }) {
+  const [searchParams] = useSearchParams();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -21,6 +23,7 @@ export default function StudentList({ title, fetchFn }) {
   const [recentActivity, setRecentActivity] = useState([]);
   const [bulkLoading, setBulkLoading] = useState(false);
   const toast = useToast();
+  const initialOpenStudentId = searchParams.get("candidateId") || "";
 
   const refresh = useCallback(() => {
     setLoading(true);
@@ -233,6 +236,7 @@ export default function StudentList({ title, fetchFn }) {
         enableSelection={isHead}
         selectedIds={selectedIds}
         onToggleSelected={toggleSelected}
+        initialOpenStudentId={initialOpenStudentId}
       />
     </div>
   );

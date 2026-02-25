@@ -247,7 +247,7 @@ router.get("/head/final-rejected", allowRoles("HEAD"), async (_req, res) => {
 
 router.get("/interview_required", async (req, res) => {
   const filter = {
-    status: { $in: ["HEAD_ACCEPTED", "INTERVIEW_SCHEDULED"] },
+    status: { $in: ["INTERVIEW_SCHEDULED"] },
     ...buildAdmissionForRole(req.user.role, req.user.course),
   };
   const data = await Admission.find(filter).sort({ updatedAt: -1 });
@@ -274,7 +274,7 @@ router.get("/get-data", async (req, res) => {
 
 router.get("/notifications", async (req, res) => {
   try {
-    const days = String(req.query.days || "7").toLowerCase();
+    const days = String(req.query.days || "all").toLowerCase();
     const rawLimit = Number(req.query.limit || 50);
     const limit = Number.isFinite(rawLimit) ? Math.min(Math.max(rawLimit, 1), 500) : 50;
 

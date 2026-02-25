@@ -12,7 +12,14 @@ import {
 
 const ACTION_REFRESH_DELAY_MS = 5000;
 
-function StudentTable({ students, refresh, enableSelection = false, selectedIds = [], onToggleSelected = () => {} }) {
+function StudentTable({
+  students,
+  refresh,
+  enableSelection = false,
+  selectedIds = [],
+  onToggleSelected = () => {},
+  initialOpenStudentId = "",
+}) {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionKey, setActionKey] = useState("");
@@ -34,6 +41,13 @@ function StudentTable({ students, refresh, enableSelection = false, selectedIds 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [selectedStudent]);
+
+  useEffect(() => {
+    if (!initialOpenStudentId || !Array.isArray(students) || students.length === 0) return;
+    if (selectedStudent?._id === initialOpenStudentId) return;
+    const match = students.find((student) => String(student?._id) === String(initialOpenStudentId));
+    if (match) setSelectedStudent(match);
+  }, [initialOpenStudentId, students, selectedStudent]);
 
   if (!Array.isArray(students) || students.length === 0) {
     return <EmptyState />;

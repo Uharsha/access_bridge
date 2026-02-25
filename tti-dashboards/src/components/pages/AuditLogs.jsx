@@ -4,7 +4,7 @@ import { getNotifications } from "../../server/Api";
 export default function AuditLogs() {
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
-  const [windowDays, setWindowDays] = useState("30");
+  const [windowDays, setWindowDays] = useState("all");
 
   useEffect(() => {
     setLoading(true);

@@ -6,7 +6,7 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
   const [unread, setUnread] = useState(0);
-  const [windowDays, setWindowDays] = useState("7");
+  const [windowDays, setWindowDays] = useState("all");
   const toast = useToast();
 
   const load = useCallback(async () => {
