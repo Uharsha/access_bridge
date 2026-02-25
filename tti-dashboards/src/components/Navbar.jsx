@@ -150,8 +150,17 @@ function Navbar() {
             { to: "/teacher-dashboard/audit-logs", label: "Audit Logs" },
           ]
         : [];
+  const getCompactName = (value) => {
+    const clean = String(value || "").trim().replace(/\s+/g, " ");
+    if (!clean) return "";
+    const parts = clean.split(" ");
+    if (parts.length === 1) return parts[0];
+    const secondInitial = parts[1]?.[0] ? `${parts[1][0]}.` : "";
+    return `${parts[0]} ${secondInitial}`.trim();
+  };
+  const displayBaseName = userName ? getCompactName(userName) : (role || "User");
   const rawDisplayName = userName ? `Hi, ${userName}` : `Hi, ${role || "User"}`;
-  const compactDisplayName = rawDisplayName.length > 14 ? `${rawDisplayName.slice(0, 14)}...` : rawDisplayName;
+  const compactDisplayName = `Hi, ${displayBaseName}`;
 
   return (
     <>
@@ -200,59 +209,61 @@ function Navbar() {
                     </NavLink>
                   ))}
                 </div>
-                <div className="notification-wrap" ref={notificationRef}>
+                <div className="desktop-right-actions">
+                  <div className="notification-wrap" ref={notificationRef}>
+                    <button
+                      type="button"
+                      className="notification-btn"
+                      onClick={handleOpenNotifications}
+                      aria-label="Notifications"
+                      aria-expanded={notificationOpen}
+                      aria-controls="notification-panel"
+                    >
+                      Alerts
+                      {unreadCount > 0 && <span className="notification-count">{unreadCount > 99 ? "99+" : unreadCount}</span>}
+                    </button>
+                    {notificationOpen && (
+                      <div className="notification-panel" id="notification-panel" role="dialog" aria-label="Notification panel">
+                        <div className="notification-head">
+                          <strong>Notifications</strong>
+                          <button type="button" onClick={handleReadAll} className="notification-readall">Mark all</button>
+                        </div>
+                        <div className="notification-list">
+                          {notifications.length === 0 && <p className="notification-empty">No notifications</p>}
+                          {notifications.map((note) => (
+                            <button
+                              key={note._id}
+                              className={`notification-item ${note.isRead ? "read" : "unread"}`}
+                              onClick={() => handleRead(note._id)}
+                              type="button"
+                            >
+                              <span className="notification-title">{note.title}</span>
+                              <span className="notification-msg">{note.message}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <span style={styles.userChip} title={rawDisplayName}>
+                    {compactDisplayName}
+                  </span>
                   <button
                     type="button"
-                    className="notification-btn"
-                    onClick={handleOpenNotifications}
-                    aria-label="Notifications"
-                    aria-expanded={notificationOpen}
-                    aria-controls="notification-panel"
+                    className="desktop-theme-btn"
+                    onClick={toggleTheme}
+                    aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+                    aria-pressed={theme === "dark"}
+                    title={theme === "light" ? "Enable dark mode" : "Enable light mode"}
                   >
-                    Alerts
-                    {unreadCount > 0 && <span className="notification-count">{unreadCount > 99 ? "99+" : unreadCount}</span>}
+                    <span className={`theme-switch-track ${theme === "dark" ? "dark" : "light"}`} aria-hidden="true">
+                      <span className="theme-switch-icon sun">{"\u2600"}</span>
+                      <span className="theme-switch-icon moon">{"\u263E"}</span>
+                      <span className="theme-switch-thumb" />
+                    </span>
                   </button>
-                  {notificationOpen && (
-                    <div className="notification-panel" id="notification-panel" role="dialog" aria-label="Notification panel">
-                      <div className="notification-head">
-                        <strong>Notifications</strong>
-                        <button type="button" onClick={handleReadAll} className="notification-readall">Mark all</button>
-                      </div>
-                      <div className="notification-list">
-                        {notifications.length === 0 && <p className="notification-empty">No notifications</p>}
-                        {notifications.map((note) => (
-                          <button
-                            key={note._id}
-                            className={`notification-item ${note.isRead ? "read" : "unread"}`}
-                            onClick={() => handleRead(note._id)}
-                            type="button"
-                          >
-                            <span className="notification-title">{note.title}</span>
-                            <span className="notification-msg">{note.message}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <button type="button" onClick={handleLogout}>Logout</button>
                 </div>
-                <span style={styles.userChip}>
-                  {compactDisplayName}
-                </span>
-                <button
-                  type="button"
-                  className="desktop-theme-btn"
-                  onClick={toggleTheme}
-                  aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-                  aria-pressed={theme === "dark"}
-                  title={theme === "light" ? "Enable dark mode" : "Enable light mode"}
-                >
-                  <span className={`theme-switch-track ${theme === "dark" ? "dark" : "light"}`} aria-hidden="true">
-                    <span className="theme-switch-icon sun">{"\u2600"}</span>
-                    <span className="theme-switch-icon moon">{"\u263E"}</span>
-                    <span className="theme-switch-thumb" />
-                  </span>
-                </button>
-                <button type="button" onClick={handleLogout}>Logout</button>
               </div>
             </>
           )}
