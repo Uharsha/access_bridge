@@ -128,7 +128,7 @@ const styles = {
   title: { margin: "0 0 1rem", color: "var(--text-main)" },
   muted: { color: "var(--text-muted)" },
   empty: { border: "1px dashed var(--border-color)", borderRadius: 12, padding: "1.5rem", color: "var(--text-muted)", background: "var(--surface-card)" },
-  grid: { display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "12px" },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "12px" },
   card: { border: "1px solid var(--border-color)", background: "var(--surface-card)", borderRadius: 12, padding: "12px" },
   date: { margin: "0 0 10px", color: "var(--text-main)", fontSize: "1rem" },
   dateSub: { color: "var(--text-muted)" },

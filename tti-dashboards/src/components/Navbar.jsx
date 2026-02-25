@@ -169,8 +169,8 @@ function Navbar() {
                   title={theme === "light" ? "Enable dark mode" : "Enable light mode"}
                 >
                   <span className={`theme-switch-track ${theme === "dark" ? "dark" : "light"}`} aria-hidden="true">
-                    <span className="theme-switch-icon sun">☀</span>
-                    <span className="theme-switch-icon moon">☾</span>
+                    <span className="theme-switch-icon sun">{"\u2600"}</span>
+                    <span className="theme-switch-icon moon">{"\u263E"}</span>
                     <span className="theme-switch-thumb" />
                   </span>
                 </button>
@@ -238,10 +238,17 @@ function Navbar() {
                 </span>
                 <button
                   type="button"
+                  className="desktop-theme-btn"
                   onClick={toggleTheme}
                   aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+                  aria-pressed={theme === "dark"}
+                  title={theme === "light" ? "Enable dark mode" : "Enable light mode"}
                 >
-                  {theme === "light" ? "Dark" : "Light"}
+                  <span className={`theme-switch-track ${theme === "dark" ? "dark" : "light"}`} aria-hidden="true">
+                    <span className="theme-switch-icon sun">{"\u2600"}</span>
+                    <span className="theme-switch-icon moon">{"\u263E"}</span>
+                    <span className="theme-switch-thumb" />
+                  </span>
                 </button>
                 <button type="button" onClick={handleLogout}>Logout</button>
               </div>
