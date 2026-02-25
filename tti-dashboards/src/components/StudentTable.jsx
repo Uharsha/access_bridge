@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import EmptyState from "./pages/EmptyState";
 import "./StudentDiv.css";
 import { useToast } from "./ui/ToastContext";
@@ -23,6 +23,7 @@ function StudentTable({
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionKey, setActionKey] = useState("");
+  const autoOpenedCandidateRef = useRef("");
   const role = localStorage.getItem("role");
   const toast = useToast();
   const safeText = (value) => String(value || "").trim();
@@ -44,9 +45,13 @@ function StudentTable({
 
   useEffect(() => {
     if (!initialOpenStudentId || !Array.isArray(students) || students.length === 0) return;
+    if (autoOpenedCandidateRef.current === initialOpenStudentId) return;
     if (selectedStudent?._id === initialOpenStudentId) return;
     const match = students.find((student) => String(student?._id) === String(initialOpenStudentId));
-    if (match) setSelectedStudent(match);
+    if (match) {
+      setSelectedStudent(match);
+      autoOpenedCandidateRef.current = initialOpenStudentId;
+    }
   }, [initialOpenStudentId, students, selectedStudent]);
 
   if (!Array.isArray(students) || students.length === 0) {
