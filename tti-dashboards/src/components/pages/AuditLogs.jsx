@@ -5,6 +5,13 @@ export default function AuditLogs() {
   const [loading, setLoading] = useState(true);
   const [rows, setRows] = useState([]);
   const [windowDays, setWindowDays] = useState("all");
+  const [isCompact, setIsCompact] = useState(() => window.innerWidth <= 640);
+
+  useEffect(() => {
+    const onResize = () => setIsCompact(window.innerWidth <= 640);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -31,6 +38,17 @@ export default function AuditLogs() {
       </div>
       {loading ? (
         <p style={styles.muted}>Loading logs...</p>
+      ) : isCompact ? (
+        <div style={styles.cardList}>
+          {rows.length === 0 && <div style={styles.emptyCard}>No audit entries found.</div>}
+          {rows.map((row) => (
+            <article key={row._id} style={styles.logCard}>
+              <p style={styles.logLine}><strong>Time:</strong> {new Date(row.createdAt).toLocaleString()}</p>
+              <p style={styles.logLine}><strong>Type:</strong> {row.type || "EVENT"}</p>
+              <p style={styles.logLine}><strong>Message:</strong> {row.message} {row?.createdBy?.name ? `(${row.createdBy.name})` : ""}</p>
+            </article>
+          ))}
+        </div>
       ) : (
         <div style={styles.tableWrap}>
           <table style={styles.table}>
@@ -69,4 +87,8 @@ const styles = {
   tableWrap: { overflowX: "auto", border: "1px solid var(--border-color)", borderRadius: 12, background: "var(--surface-card)" },
   table: { width: "100%", borderCollapse: "collapse", color: "var(--text-main)" },
   empty: { textAlign: "center", padding: "16px", color: "var(--text-muted)" },
+  cardList: { display: "grid", gap: "10px" },
+  logCard: { border: "1px solid var(--border-color)", borderRadius: 10, background: "var(--surface-card)", padding: "10px" },
+  logLine: { margin: "0 0 6px", color: "var(--text-main)", lineHeight: 1.35, wordBreak: "break-word" },
+  emptyCard: { border: "1px dashed var(--border-color)", borderRadius: 10, background: "var(--surface-card)", color: "var(--text-muted)", padding: "14px", textAlign: "center" },
 };

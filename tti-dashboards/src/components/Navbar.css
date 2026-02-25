@@ -431,10 +431,60 @@
 
   .navbar-title {
     font-size: 1.2rem;
+    max-width: calc(100vw - 150px);
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .app-navbar {
     height: 74px;
+  }
+}
+
+@media (max-width: 420px) {
+  .navbar-container {
+    gap: 0.45rem;
+  }
+
+  .navbar-title {
+    font-size: 1.05rem;
+    max-width: calc(100vw - 138px);
+  }
+
+  .mobile-actions {
+    gap: 0.35rem;
+  }
+
+  .mobile-theme-btn {
+    width: 56px;
+    height: 30px;
+  }
+
+  .hamburger-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .theme-switch-track {
+    padding: 0 6px;
+  }
+
+  .theme-switch-icon {
+    font-size: 12px;
+  }
+
+  .theme-switch-thumb {
+    width: 18px;
+    height: 22px;
+  }
+
+  .theme-switch-track.dark .theme-switch-thumb {
+    transform: translateX(31px);
+  }
+
+  .mobile-drawer {
+    width: 100vw;
+    border-radius: 0;
   }
 }
 
