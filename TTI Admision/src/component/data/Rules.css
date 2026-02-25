@@ -1,0 +1,456 @@
+.tti-rules-page {
+  --rules-bg-1: #071226;
+  --rules-bg-2: #0e223f;
+  --rules-card: rgba(8, 22, 45, 0.85);
+  --rules-border: rgba(75, 163, 255, 0.35);
+  --rules-accent: #5ec7ff;
+  --rules-accent-2: #22d3ee;
+  --rules-text: #e9f4ff;
+  --rules-muted: #b6ccdf;
+
+  min-height: 100dvh;
+  width: 100%;
+  margin-top: 0;
+  position: relative;
+  overflow: hidden;
+  padding: 120px 16px 44px;
+  background:
+    radial-gradient(circle at 14% 10%, rgba(64, 151, 255, 0.2), transparent 38%),
+    radial-gradient(circle at 88% 18%, rgba(34, 211, 238, 0.18), transparent 36%),
+    linear-gradient(140deg, var(--rules-bg-1), var(--rules-bg-2));
+  color: var(--rules-text);
+}
+
+.tti-rules-page.theme-dark {
+  --rules-bg-1: #0b1021;
+  --rules-bg-2: #1a1431;
+  --rules-card: rgba(15, 20, 45, 0.84);
+  --rules-border: rgba(111, 146, 255, 0.32);
+  --rules-accent: #8fb4ff;
+  --rules-accent-2: #56c8ff;
+  --rules-text: #ecf2ff;
+  --rules-muted: #c7d4f3;
+}
+
+.tti-rules-page.theme-light {
+  --rules-bg-1: #f9f8ff;
+  --rules-bg-2: #fdf8e8;
+  --rules-card: rgba(255, 255, 255, 0.86);
+  --rules-border: rgba(123, 75, 194, 0.22);
+  --rules-accent: #5a2c91;
+  --rules-accent-2: #7b4bc2;
+  --rules-text: #2b124c;
+  --rules-muted: #4c5060;
+}
+
+.tti-rules-orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(2px);
+  pointer-events: none;
+  animation: ttiRulesFloat 8s ease-in-out infinite;
+}
+
+.tti-rules-orb-left {
+  width: 260px;
+  height: 260px;
+  top: -80px;
+  left: -80px;
+  background: radial-gradient(circle, rgba(94, 199, 255, 0.36), rgba(94, 199, 255, 0));
+}
+
+.tti-rules-orb-right {
+  width: 340px;
+  height: 340px;
+  bottom: -120px;
+  right: -120px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.26), rgba(34, 211, 238, 0));
+  animation-delay: 1.6s;
+}
+
+.tti-rules-card {
+  width: 980px;
+  margin: 0 auto;
+  background: var(--rules-card);
+  border: 1px solid var(--rules-border);
+  border-radius: 22px;
+  padding: 42px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 22px 60px rgba(1, 11, 28, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  position: relative;
+  z-index: 1;
+  animation: ttiRulesEnter 0.6s ease-out both;
+}
+
+.tti-rules-header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.tti-rules-kicker {
+  margin: 0;
+  color: var(--rules-accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tti-rules-header h1 {
+  margin: 8px 0;
+  font-size: 42px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.tti-rules-page.theme-light .tti-rules-header h1 {
+  color: #2b124c;
+}
+
+.tti-rules-subtitle {
+  margin: 0;
+  color: var(--rules-muted);
+  font-size: 16px;
+}
+
+.tti-rules-intro {
+  margin: 0 0 24px;
+  padding: 14px 16px;
+  border-left: 4px solid var(--rules-accent);
+  background: rgba(94, 199, 255, 0.1);
+  border-radius: 10px;
+  color: var(--rules-text);
+  line-height: 1.65;
+}
+
+.tti-rules-page.theme-light .tti-rules-intro {
+  background: rgba(123, 75, 194, 0.08);
+}
+
+.tti-rules-sections {
+  display: grid;
+  gap: 14px;
+}
+
+.tti-rules-section,
+.tti-rules-note {
+  background: rgba(11, 31, 59, 0.58);
+  border: 1px solid rgba(107, 183, 255, 0.25);
+  border-radius: 16px;
+  padding: 22px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: ttiRulesReveal 0.45s ease-out forwards;
+}
+
+.tti-rules-page.theme-light .tti-rules-section,
+.tti-rules-page.theme-light .tti-rules-note {
+  background: rgba(255, 255, 255, 0.68);
+  border-color: rgba(123, 75, 194, 0.2);
+}
+
+.tti-rules-section h2,
+.tti-rules-note h2 {
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  color: #f5fbff;
+}
+
+.tti-rules-page.theme-light .tti-rules-section h2,
+.tti-rules-page.theme-light .tti-rules-note h2 {
+  color: #2b124c;
+}
+
+.tti-rules-section h2 span {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #021a33;
+  background: linear-gradient(145deg, var(--rules-accent), var(--rules-accent-2));
+  box-shadow: 0 6px 15px rgba(34, 211, 238, 0.35);
+  flex-shrink: 0;
+}
+
+.tti-rules-page.theme-light .tti-rules-section h2 span {
+  color: #ffffff;
+}
+
+.tti-rules-section p,
+.tti-rules-note p {
+  margin: 0 0 10px;
+  color: var(--rules-muted);
+  line-height: 1.7;
+}
+
+.tti-rules-section ul,
+.tti-rules-section ol {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.tti-rules-section li {
+  color: var(--rules-text);
+  line-height: 1.55;
+}
+
+.tti-rules-note {
+  margin-top: 14px;
+  border-color: rgba(34, 211, 238, 0.35);
+  background: linear-gradient(135deg, rgba(11, 31, 59, 0.75), rgba(8, 42, 58, 0.6));
+}
+
+.tti-rules-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.tti-rules-back {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #03213f;
+  background: linear-gradient(120deg, #8ad8ff 0%, #22d3ee 100%);
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(34, 211, 238, 0.32);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+  background-size: 320% 320%;
+  animation: ttiRulesBtnFlow 2.4s linear infinite;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  will-change: background-position;
+}
+
+.tti-rules-back::after {
+  content: "";
+  position: absolute;
+  top: -160%;
+  left: -44%;
+  width: 36%;
+  height: 420%;
+  transform: rotate(18deg);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.28) 52%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: ttiRulesSheen 1.9s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tti-rules-page.theme-light .tti-rules-back {
+  color: #2b124c;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: linear-gradient(120deg, #ffd43b 0%, #ffe777 28%, #7b4bc2 64%, #ffd43b 100%);
+  box-shadow: 0 10px 24px rgba(90, 44, 145, 0.32);
+  border: 1px solid rgba(90, 44, 145, 0.28);
+}
+
+.tti-rules-page.theme-dark .tti-rules-back {
+  color: #f3ecff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(120deg, #2e2a4d 0%, #43346f 30%, #56c8ff 62%, #2e2a4d 100%);
+  border: 1px solid rgba(111, 146, 255, 0.35);
+}
+
+.tti-rules-back:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.02);
+  box-shadow: 0 16px 30px rgba(34, 211, 238, 0.45);
+}
+
+.tti-rules-back:active {
+  transform: translateY(0);
+}
+
+.tti-rules-page.theme-light .tti-rules-back:hover,
+.tti-rules-page.theme-dark .tti-rules-back:hover {
+  animation-duration: 2.2s;
+}
+
+@keyframes ttiRulesEnter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ttiRulesReveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ttiRulesFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+@keyframes ttiRulesBtnFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes ttiRulesSheen {
+  0% {
+    left: -50%;
+  }
+  100% {
+    left: 128%;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+/* ===== PAGE-SCOPED RESPONSIVE LOCK ===== */
+.tti-rules-page {
+  min-width: 0 !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+.tti-rules-page .container {
+  width: min(100%, 1300px) !important;
+  margin: 0 auto !important;
+  padding-inline: clamp(10px, 2vw, 20px);
+}
+
+.tti-rules-card {
+  width: 100% !important;
+  max-width: 980px;
+  margin: 0 auto !important;
+}
+
+@media (max-width: 768px) {
+  .tti-rules-page {
+    padding: 96px 12px 28px;
+  }
+
+  .tti-rules-card {
+    padding: 22px 16px;
+    border-radius: 16px;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .tti-rules-kicker {
+    font-size: 10px;
+  }
+
+  .tti-rules-header h1 {
+    font-size: 28px;
+  }
+
+  .tti-rules-subtitle {
+    font-size: 13px;
+  }
+
+  .tti-rules-intro {
+    font-size: 13px;
+    line-height: 1.55;
+    padding: 10px 12px;
+  }
+
+  .tti-rules-section,
+  .tti-rules-note {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .tti-rules-section h2,
+  .tti-rules-note h2 {
+    font-size: 17px;
+    gap: 8px;
+  }
+
+  .tti-rules-section h2 span {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .tti-rules-section p,
+  .tti-rules-note p,
+  .tti-rules-section li {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .tti-rules-section ul,
+  .tti-rules-section ol {
+    padding-left: 16px;
+    gap: 6px;
+  }
+
+  .tti-rules-back {
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tti-rules-header h1 {
+    font-size: 24px;
+  }
+
+  .tti-rules-subtitle,
+  .tti-rules-intro,
+  .tti-rules-section p,
+  .tti-rules-note p,
+  .tti-rules-section li {
+    font-size: 12px;
+  }
+
+  .tti-rules-section h2,
+  .tti-rules-note h2 {
+    font-size: 15px;
+  }
+}
