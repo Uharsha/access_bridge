@@ -301,7 +301,7 @@ const styles = {
     fontSize: "0.78rem",
     fontWeight: 600,
     whiteSpace: "nowrap",
-    maxWidth: "138px",
+    maxWidth: "156px",
     overflow: "hidden",
     textOverflow: "ellipsis",
   },
