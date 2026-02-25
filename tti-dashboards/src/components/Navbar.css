@@ -203,8 +203,8 @@
 
 .mobile-theme-btn {
   display: none;
-  width: 64px;
-  height: 34px;
+  width: 60px;
+  height: 32px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.45);
   background: transparent;
@@ -226,15 +226,11 @@
   border-color: rgba(255, 255, 255, 0.5);
 }
 
-[data-theme="dark"] .mobile-theme-btn {
-  border-color: rgba(148, 163, 184, 0.45);
-}
-
 [data-theme="light"] .desktop-theme-btn,
 [data-theme="dark"] .desktop-theme-btn {
   display: inline-flex;
-  width: 64px;
-  height: 34px;
+  width: 60px;
+  height: 32px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.45);
   background: transparent;
@@ -253,7 +249,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 8px;
+  padding: 0 7px;
   position: relative;
   transition: background 0.25s ease;
 }
@@ -267,7 +263,7 @@
 }
 
 .theme-switch-icon {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1;
   z-index: 1;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
@@ -285,8 +281,8 @@
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 22px;
-  height: 26px;
+  width: 20px;
+  height: 24px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
@@ -294,7 +290,11 @@
 }
 
 .theme-switch-track.dark .theme-switch-thumb {
-  transform: translateX(36px);
+  transform: translateX(34px);
+}
+
+.desktop-theme-btn {
+  margin-left: 2px;
 }
 
 .hamburger-lines {

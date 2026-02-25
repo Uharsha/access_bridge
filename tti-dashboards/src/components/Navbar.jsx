@@ -150,6 +150,8 @@ function Navbar() {
             { to: "/teacher-dashboard/audit-logs", label: "Audit Logs" },
           ]
         : [];
+  const rawDisplayName = userName ? `Hi, ${userName}` : `Hi, ${role || "User"}`;
+  const compactDisplayName = rawDisplayName.length > 14 ? `${rawDisplayName.slice(0, 14)}...` : rawDisplayName;
 
   return (
     <>
@@ -234,7 +236,7 @@ function Navbar() {
                   )}
                 </div>
                 <span style={styles.userChip}>
-                  {userName ? `Hi, ${userName}` : `Hi, ${role || "User"}`}
+                  {compactDisplayName}
                 </span>
                 <button
                   type="button"
@@ -291,14 +293,17 @@ function Navbar() {
 
 const styles = {
   userChip: {
-    padding: "6px 12px",
+    padding: "5px 9px",
     borderRadius: "999px",
     background: "rgba(255,255,255,0.18)",
     border: "1px solid rgba(255,255,255,0.28)",
     color: "#fff",
-    fontSize: "0.9rem",
+    fontSize: "0.78rem",
     fontWeight: 600,
     whiteSpace: "nowrap",
+    maxWidth: "138px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
 };
 
