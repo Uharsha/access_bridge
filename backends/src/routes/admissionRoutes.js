@@ -1,7 +1,9 @@
 const express = require("express");
 const multer = require("multer");
+const mongoose = require("mongoose");
 
 const Admission = require("../models/Admission");
+const Notification = require("../models/Notification");
 const { allowRoles, requireAuth } = require("../middleware/auth");
 const { uploadFile } = require("../utils/cloudinary");
 const { sendMail, templates } = require("../utils/mailer");
@@ -48,6 +50,52 @@ function getCourseTeachers(course) {
       email: normalizeText(teacher?.email).toLowerCase(),
     }))
     .filter((teacher) => teacher.email);
+}
+
+function visibilityRolesFor(userRole) {
+  if (userRole === "HEAD") return ["ALL", "HEAD", "TEACHER"];
+  return ["ALL", userRole];
+}
+
+function buildNotificationAccessFilter(user, extra = {}) {
+  const filter = {
+    targetRole: { $in: visibilityRolesFor(user.role) },
+    ...extra,
+  };
+
+  if (user.role === "TEACHER" && normalizeText(user.course)) {
+    filter.$or = [{ targetCourse: "" }, { targetCourse: normalizeText(user.course) }];
+  }
+
+  return filter;
+}
+
+async function createNotification({
+  title,
+  message,
+  type = "INFO",
+  relatedAdmission = null,
+  targetRole = "ALL",
+  targetCourse = "",
+  actor = null,
+}) {
+  try {
+    await Notification.create({
+      title: normalizeText(title) || "System Update",
+      message: normalizeText(message) || "An update was made.",
+      type: normalizeText(type) || "INFO",
+      relatedAdmission,
+      targetRole,
+      targetCourse: normalizeText(targetCourse),
+      createdBy: {
+        id: actor?._id || null,
+        name: normalizeText(actor?.name) || "System",
+        role: normalizeText(actor?.role) || "SYSTEM",
+      },
+    });
+  } catch (_err) {
+    // Keep admission flow resilient even if notification write fails.
+  }
 }
 
 async function sendBulkMails(items) {
@@ -127,6 +175,15 @@ router.post("/saveAdmission", uploadFields, async (req, res) => {
       ...templates.submissionToUser(admission),
     });
     await sendBulkMails(mails);
+
+    await createNotification({
+      title: "New admission submitted",
+      message: `${admission.name} submitted an application for ${admission.course}.`,
+      type: "ADMISSION_SUBMITTED",
+      relatedAdmission: admission._id,
+      targetRole: "HEAD",
+      actor: null,
+    });
 
     return res.status(201).json({ message: "Admission submitted successfully", data: admission });
   } catch (err) {
@@ -215,17 +272,90 @@ router.get("/get-data", async (req, res) => {
   res.json({ students, statusCounts });
 });
 
-// Notifications disabled by request, keep endpoints for UI compatibility.
-router.get("/notifications", async (_req, res) => {
-  res.json({ notifications: [], unreadCount: 0 });
+router.get("/notifications", async (req, res) => {
+  try {
+    const days = String(req.query.days || "7").toLowerCase();
+    const rawLimit = Number(req.query.limit || 50);
+    const limit = Number.isFinite(rawLimit) ? Math.min(Math.max(rawLimit, 1), 500) : 50;
+
+    const filter = buildNotificationAccessFilter(req.user);
+    if (days !== "all") {
+      const parsedDays = Number(days);
+      if (Number.isFinite(parsedDays) && parsedDays > 0) {
+        const since = new Date(Date.now() - parsedDays * 24 * 60 * 60 * 1000);
+        filter.createdAt = { $gte: since };
+      }
+    }
+
+    const notifications = await Notification.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+
+    const userId = mongoose.Types.ObjectId.isValid(req.user._id)
+      ? new mongoose.Types.ObjectId(req.user._id)
+      : req.user._id;
+
+    const unreadCount = await Notification.countDocuments({
+      ...filter,
+      isReadBy: { $ne: userId },
+    });
+
+    const mapped = notifications.map((item) => ({
+      ...item,
+      isRead: Array.isArray(item.isReadBy)
+        ? item.isReadBy.some((id) => String(id) === String(req.user._id))
+        : false,
+    }));
+
+    return res.json({ notifications: mapped, unreadCount });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to load notifications", detail: err.message });
+  }
 });
 
-router.put("/notifications/:id/read", async (_req, res) => {
-  res.json({ message: "Notifications are disabled" });
+router.put("/notifications/:id/read", async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid notification id" });
+    }
+
+    const userId = mongoose.Types.ObjectId.isValid(req.user._id)
+      ? new mongoose.Types.ObjectId(req.user._id)
+      : req.user._id;
+
+    const filter = buildNotificationAccessFilter(req.user, { _id: req.params.id });
+    const updated = await Notification.findOneAndUpdate(
+      filter,
+      { $addToSet: { isReadBy: userId } },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ error: "Notification not found" });
+    return res.json({ message: "Notification marked as read" });
+  } catch (err) {
+    return res.status(500).json({ error: "Unable to update notification", detail: err.message });
+  }
 });
 
-router.put("/notifications/read-all", async (_req, res) => {
-  res.json({ message: "Notifications are disabled" });
+router.put("/notifications/read-all", async (req, res) => {
+  try {
+    const userId = mongoose.Types.ObjectId.isValid(req.user._id)
+      ? new mongoose.Types.ObjectId(req.user._id)
+      : req.user._id;
+    const filter = buildNotificationAccessFilter(req.user, { isReadBy: { $ne: userId } });
+
+    const result = await Notification.updateMany(filter, {
+      $addToSet: { isReadBy: userId },
+    });
+
+    return res.json({
+      message: "All notifications marked as read",
+      updatedCount: result.modifiedCount || 0,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: "Unable to update notifications", detail: err.message });
+  }
 });
 
 router.put("/head/approve/:id", allowRoles("HEAD"), async (req, res) => {
@@ -249,6 +379,16 @@ router.put("/head/approve/:id", allowRoles("HEAD"), async (req, res) => {
     }))
   );
 
+  await createNotification({
+    title: "Head approved application",
+    message: `${admission.name} was approved by head for ${admission.course}.`,
+    type: "HEAD_APPROVED",
+    relatedAdmission: admission._id,
+    targetRole: "TEACHER",
+    targetCourse: admission.course,
+    actor: req.user,
+  });
+
   return res.json({ message: "Admission approved by head", data: admission });
 });
 
@@ -270,12 +410,30 @@ router.put("/head/reject/:id", allowRoles("HEAD"), async (req, res) => {
     ...templates.headRejectedToUser(admission),
   });
 
+  await createNotification({
+    title: "Head rejected application",
+    message: `${admission.name}'s application was rejected by head.`,
+    type: "HEAD_REJECTED",
+    relatedAdmission: admission._id,
+    targetRole: "HEAD",
+    actor: req.user,
+  });
+
   return res.json({ message: "Admission rejected by head", data: admission });
 });
 
 router.put("/head/delete/:id", allowRoles("HEAD"), async (req, res) => {
   const admission = await Admission.findByIdAndDelete(req.params.id);
   if (!admission) return res.status(404).json({ error: "Admission not found" });
+
+  await createNotification({
+    title: "Application deleted",
+    message: `${admission.name}'s application was deleted by ${req.user.role}.`,
+    type: "ADMISSION_DELETED",
+    relatedAdmission: admission._id,
+    targetRole: "HEAD",
+    actor: req.user,
+  });
 
   return res.json({ message: "Admission deleted", data: admission });
 });
@@ -311,6 +469,16 @@ router.post("/schedule-interview/:id", allowRoles("TEACHER", "HEAD"), async (req
     ...templates.interviewScheduledToUser(admission),
   });
 
+  await createNotification({
+    title: "Interview scheduled",
+    message: `Interview scheduled for ${admission.name} on ${date} at ${time}.`,
+    type: "INTERVIEW_SCHEDULED",
+    relatedAdmission: admission._id,
+    targetRole: "ALL",
+    targetCourse: admission.course,
+    actor: req.user,
+  });
+
   return res.json({ message: "Interview scheduled", data: admission });
 });
 
@@ -335,6 +503,16 @@ router.put("/final/approve/:id", allowRoles("TEACHER", "HEAD"), async (req, res)
     ...templates.finalSelectedToUser(admission),
   });
 
+  await createNotification({
+    title: "Final admission selected",
+    message: `${admission.name} was marked as selected.`,
+    type: "FINAL_SELECTED",
+    relatedAdmission: admission._id,
+    targetRole: "ALL",
+    targetCourse: admission.course,
+    actor: req.user,
+  });
+
   return res.json({ message: "Final approval complete", data: admission });
 });
 
@@ -357,6 +535,16 @@ router.put("/final/reject/:id", allowRoles("TEACHER", "HEAD"), async (req, res) 
   await sendMail({
     to: admission.email,
     ...templates.finalRejectedToUser(admission),
+  });
+
+  await createNotification({
+    title: "Final admission rejected",
+    message: `${admission.name} was marked as rejected.`,
+    type: "FINAL_REJECTED",
+    relatedAdmission: admission._id,
+    targetRole: "ALL",
+    targetCourse: admission.course,
+    actor: req.user,
   });
 
   return res.json({ message: "Final rejection complete", data: admission });

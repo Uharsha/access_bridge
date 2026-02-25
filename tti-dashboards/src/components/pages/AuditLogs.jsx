@@ -48,8 +48,8 @@ export default function AuditLogs() {
               {rows.map((row) => (
                 <tr key={row._id}>
                   <td>{new Date(row.createdAt).toLocaleString()}</td>
-                  <td>{row?.meta?.type || row.role || "EVENT"}</td>
-                  <td>{row.message}</td>
+                  <td>{row.type || "EVENT"}</td>
+                  <td>{row.message} {row?.createdBy?.name ? `(${row.createdBy.name})` : ""}</td>
                 </tr>
               ))}
             </tbody>
