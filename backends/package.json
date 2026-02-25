@@ -1,0 +1,19 @@
+{
+  "name": "tti-backend",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3"
+  },
+  "description": "Express + MongoDB Atlas backend for: - Admission form submission (`/admission/saveAdmission`) - Head/Teacher dashboard workflows - Auth (`/api/auth/*`) - Interview scheduling and workflow emails",
+  "devDependencies": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

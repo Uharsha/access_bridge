@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admission Records</title>
+    <style>
+        table, td, th {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+        }
+        img {
+            width: 120px;
+            border-radius: 5px;
+        }
+        h2{
+            text-align: center;
+            color: green;
+            
+        }
+    </style>
+</head>
+<body>
+
+<h2>All Admission Details</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Mobile</th>
+            <th>G_mail</th>
+            <th>DOB</th>
+            <th>Gender</th>
+            <th>State</th>
+            <th>District</th>
+            <th>Course</th>
+            <th>passport__photo</th>
+            <th>Aadhar_card</th>
+            <th>UDID/Sadaram</th>
+        </tr>
+    </thead>
+    <tbody id="dataTable"></tbody>
+</table>
+
+<script>
+async function loadData() {
+    let res = await fetch("http://localhost:5400/allAdmissions");
+    let data = await res.json();
+
+    let rows = "";
+
+    data.forEach(item => {
+        rows += `
+            <tr>
+                <td>${item.name}</td>
+                <td>${item.mobile}</td>
+                <td>${item.email}</td>
+                <td>${item.dob}</td>
+                <td>${item.gender}</td>
+                <td>${item.state}</td>
+                <td>${item.district}</td>
+                <td>${item.course}</td>
+
+                  <td>
+                    <img src="http://localhost:5400/allAdmissions/${item.passport_photo}" alt="passport Photo"/>
+                    <br>
+                    <a href="http://localhost:5400/allAdmissions/${item.passport_photo}" download>Download</a>
+                </td>
+                <td>
+                    <img src="http://localhost:5400/allAdmissions/${item.adhar_photo}" alt="Aadhaar Photo"/>
+                    <br>
+                    <a href="http://localhost:5400/allAdmissions/${item.adhar_photo}" download>Download</a>
+                </td>
+
+                <td>
+                    <img src="http://localhost:5400/allAdmissions/${item.UDID}" alt="UDID Photo"/>
+                    <br>
+                    <a href="http://localhost:5400/allAdmissions/${item.UDID}" download>Download</a>
+                </td>
+            </tr>
+        `;
+    });
+
+    document.getElementById("dataTable").innerHTML = rows;
+}
+
+loadData();
+</script>
+
+</body>
+</html>
