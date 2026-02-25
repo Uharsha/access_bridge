@@ -98,6 +98,7 @@ function Navbar() {
   };
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
+  const toggleTheme = () => setTheme((prev) => (prev === "light" ? "dark" : "light"));
 
   const handleOpenNotifications = () => {
     setNotificationOpen((prev) => !prev);
@@ -158,20 +159,32 @@ function Navbar() {
 
           {isLogin && (
             <>
-              <button
-                type="button"
-                className="hamburger-btn"
-                onClick={() => setMobileMenuOpen(true)}
-                aria-label="Open menu"
-                aria-expanded={mobileMenuOpen}
-                aria-controls="mobile-menu-drawer"
-              >
-                <span className="hamburger-lines" aria-hidden="true">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </span>
-              </button>
+              <div className="mobile-actions">
+                <button
+                  type="button"
+                  className="mobile-theme-btn"
+                  onClick={toggleTheme}
+                  aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+                  aria-pressed={theme === "dark"}
+                  title={theme === "light" ? "Enable dark mode" : "Enable light mode"}
+                >
+                  <span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span>
+                </button>
+                <button
+                  type="button"
+                  className="hamburger-btn"
+                  onClick={() => setMobileMenuOpen(true)}
+                  aria-label="Open menu"
+                  aria-expanded={mobileMenuOpen}
+                  aria-controls="mobile-menu-drawer"
+                >
+                  <span className="hamburger-lines" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </span>
+                </button>
+              </div>
 
               <div className="nav-links desktop-links">
                 <div className="desktop-link-scroll">
@@ -221,7 +234,7 @@ function Navbar() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}
+                  onClick={toggleTheme}
                   aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
                 >
                   {theme === "light" ? "Dark" : "Light"}

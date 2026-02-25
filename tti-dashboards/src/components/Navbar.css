@@ -195,6 +195,31 @@
   cursor: pointer;
 }
 
+.mobile-actions {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mobile-theme-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="dark"] .mobile-theme-btn {
+  background: rgba(15, 23, 42, 0.48);
+  border-color: rgba(148, 163, 184, 0.45);
+}
+
 .hamburger-lines {
   display: inline-flex;
   flex-direction: column;
@@ -296,6 +321,14 @@
 @media (max-width: 992px) {
   .desktop-links {
     display: none;
+  }
+
+  .mobile-actions {
+    display: inline-flex;
+  }
+
+  .mobile-theme-btn {
+    display: inline-flex;
   }
 
   .hamburger-btn {
