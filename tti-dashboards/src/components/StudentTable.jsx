@@ -25,6 +25,8 @@ function StudentTable({
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionKey, setActionKey] = useState("");
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteReason, setDeleteReason] = useState("");
   const autoOpenedCandidateRef = useRef("");
   const navigate = useNavigate();
   const role = localStorage.getItem("role");
@@ -39,6 +41,8 @@ function StudentTable({
 
   const handleCloseDetails = useCallback(() => {
     setSelectedStudent(null);
+    setDeleteConfirmOpen(false);
+    setDeleteReason("");
     if (closeRedirectPath) {
       navigate(closeRedirectPath, { replace: true });
     }
@@ -88,18 +92,15 @@ function StudentTable({
     }
   };
 
-  const handleHeadDelete = async (student) => {
-    if (actionLoading) return;
-    const confirmed = window.confirm(`Delete application for ${student.name}? This can be restored only from DB.`);
-    if (!confirmed) return;
-
-    const reason = window.prompt("Reason for delete (optional):", "") || "";
-
+  const handleHeadDelete = async () => {
+    if (!selectedStudent || actionLoading) return;
     setActionLoading(true);
-    setActionKey(`${student._id}:head-delete`);
+    setActionKey(`${selectedStudent._id}:head-delete`);
     try {
-      await headDeleteStudent(student._id, reason);
+      await headDeleteStudent(selectedStudent._id, deleteReason.trim());
       setSelectedStudent(null);
+      setDeleteConfirmOpen(false);
+      setDeleteReason("");
       toast.success("Application deleted. Refreshing in 5 seconds...");
       window.setTimeout(() => {
         window.location.reload();
@@ -166,6 +167,9 @@ function StudentTable({
           )}
           <h3 style={styles.cardName}>{s.name}</h3>
           <p style={styles.cardCourse}>{s.course}</p>
+          <span style={{ ...styles.statusPill, color: getStatusColor(s.status), borderColor: `${getStatusColor(s.status)}55` }}>
+            {String(s.status || "PENDING").replaceAll("_", " ")}
+          </span>
           <button type="button" onClick={() => setSelectedStudent(s)} style={styles.viewButton}>
             View Profile
           </button>
@@ -292,7 +296,7 @@ function StudentTable({
               {role === "HEAD" && (
                 <button
                   type="button"
-                  onClick={() => handleHeadDelete(selectedStudent)}
+                  onClick={() => setDeleteConfirmOpen(true)}
                   disabled={actionLoading}
                   style={{
                     ...styles.actionButton,
@@ -346,6 +350,41 @@ function StudentTable({
           </div>
         </div>
       )}
+      {deleteConfirmOpen && selectedStudent && (
+        <div className="modalOverlay" onClick={(e) => e.target === e.currentTarget && setDeleteConfirmOpen(false)}>
+          <div className="modalContent" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-title">
+            <button type="button" onClick={() => setDeleteConfirmOpen(false)} style={styles.closeButton} aria-label="Close delete confirmation">
+              x
+            </button>
+            <h3 id="delete-confirm-title" style={styles.confirmTitle}>Delete Application</h3>
+            <p style={styles.confirmText}>
+              You are deleting <strong>{selectedStudent.name}</strong>. This removes the application from dashboard lists.
+            </p>
+            <label htmlFor="delete-reason" style={styles.confirmLabel}>Reason (optional)</label>
+            <textarea
+              id="delete-reason"
+              value={deleteReason}
+              onChange={(e) => setDeleteReason(e.target.value)}
+              rows={3}
+              placeholder="Example: Duplicate entry"
+              style={styles.confirmInput}
+            />
+            <div style={styles.confirmActions}>
+              <button type="button" style={styles.cancelBtn} onClick={() => setDeleteConfirmOpen(false)} disabled={actionLoading}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                style={styles.deleteBtn}
+                onClick={handleHeadDelete}
+                disabled={actionLoading}
+              >
+                {actionLoading ? "Deleting..." : "Yes, Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -353,48 +392,68 @@ function StudentTable({
 const styles = {
   tableContainer: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-    gap: "20px",
-    padding: "20px",
+    gridTemplateColumns: "repeat(auto-fill, minmax(235px, 1fr))",
+    gap: "16px",
+    padding: "10px 2px",
   },
   card: {
-    backgroundColor: "var(--surface-card)",
+    background: "var(--dash-panel-bg)",
     color: "var(--text-main)",
-    border: "1px solid var(--border-color)",
-    borderRadius: "12px",
-    padding: "15px",
+    border: "1px solid var(--dash-panel-border)",
+    borderRadius: "14px",
+    padding: "16px 14px 14px",
     width: "100%",
     position: "relative",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+    boxShadow: "0 12px 28px rgba(2, 8, 25, 0.24)",
     textAlign: "center",
     transition: "all 0.3s ease",
+    backdropFilter: "blur(2px)",
   },
   cardImage: {
-    width: 80,
-    height: 80,
+    width: 86,
+    height: 86,
     borderRadius: "50%",
     objectFit: "cover",
+    border: "2px solid var(--dash-soft-border)",
+    boxShadow: "0 8px 18px rgba(2, 8, 25, 0.35)",
   },
   cardName: {
-    margin: "10px 0 5px",
-    color: "var(--text-main)",
+    margin: "11px 0 5px",
+    color: "var(--dash-strong-text)",
     fontWeight: "700",
+    fontSize: "1.05rem",
   },
   cardCourse: {
-    color: "var(--text-muted)",
-    fontSize: "14px",
+    color: "var(--dash-muted-text)",
+    fontSize: "13px",
     fontWeight: "600",
+    margin: 0,
+  },
+  statusPill: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "1px solid",
+    padding: "4px 10px",
+    borderRadius: "999px",
+    fontSize: "11px",
+    fontWeight: 800,
+    letterSpacing: "0.2px",
+    marginTop: "10px",
+    textTransform: "uppercase",
+    background: "var(--dash-soft-bg)",
   },
   viewButton: {
     width: "100%",
-    padding: "8px",
-    backgroundColor: "#667eea",
+    padding: "9px",
+    background: "linear-gradient(135deg, #657cff, #8b5cf6)",
     color: "#fff",
     border: "none",
-    borderRadius: "6px",
+    borderRadius: "10px",
     cursor: "pointer",
     fontWeight: "bold",
-    marginTop: "10px",
+    marginTop: "12px",
+    boxShadow: "0 8px 18px rgba(79,70,229,0.35)",
   },
   closeButton: {
     position: "absolute",
@@ -518,6 +577,55 @@ const styles = {
     fontSize: "12px",
     color: "var(--modal-text)",
     fontWeight: 600,
+  },
+  confirmTitle: {
+    margin: "0 0 10px",
+    color: "var(--modal-text)",
+  },
+  confirmText: {
+    color: "var(--modal-muted)",
+    margin: "0 0 10px",
+    lineHeight: 1.45,
+  },
+  confirmLabel: {
+    display: "block",
+    fontWeight: 700,
+    color: "var(--modal-text)",
+    marginBottom: "6px",
+  },
+  confirmInput: {
+    width: "100%",
+    resize: "vertical",
+    border: "1px solid var(--border-color)",
+    borderRadius: "8px",
+    padding: "8px",
+    color: "var(--modal-text)",
+    background: "var(--modal-surface-muted)",
+    marginBottom: "12px",
+  },
+  confirmActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "8px",
+    flexWrap: "wrap",
+  },
+  cancelBtn: {
+    border: "1px solid var(--border-color)",
+    borderRadius: "8px",
+    background: "var(--modal-surface)",
+    color: "var(--modal-text)",
+    padding: "8px 12px",
+    fontWeight: 700,
+    cursor: "pointer",
+  },
+  deleteBtn: {
+    border: "1px solid #ef9a9a",
+    borderRadius: "8px",
+    background: "#ffebee",
+    color: "#b71c1c",
+    padding: "8px 12px",
+    fontWeight: 700,
+    cursor: "pointer",
   },
 };
 

@@ -3,7 +3,6 @@
 
 import { useLayoutEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import TTIDescription from "./component/decription/TTIDescription";
 import AdmissionForm from "./component/AdimssoinForm";
 import './App.css'
 import Rules from "./component/data/Rules";
@@ -29,7 +28,7 @@ function App() {
     <>
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<TTIDescription />} />
+        <Route path="/" element={<AdmissionForm />} />
         <Route path="/admission" element={<AdmissionForm />} />
         <Route path="/rules" element={<Rules />} />
       </Routes>

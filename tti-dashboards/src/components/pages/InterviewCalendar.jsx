@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getInterviewRequiredStudents } from "../../server/Api";
+import { useToast } from "../ui/ToastContext";
 
 export default function InterviewCalendar() {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
   const navigate = useNavigate();
+  const toast = useToast();
   const role = (localStorage.getItem("role") || "").toUpperCase();
 
   useEffect(() => {
@@ -81,6 +83,16 @@ export default function InterviewCalendar() {
     navigate(`/head-dashboard/head-accepted?candidateId=${student._id}&source=calendar`);
   };
 
+  const copyInterviewLink = async (link) => {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.success("Interview link copied.");
+    } catch {
+      toast.error("Unable to copy link.");
+    }
+  };
+
   return (
     <div style={styles.wrap}>
       <h2 style={styles.title}>Interview Calendar</h2>
@@ -101,11 +113,19 @@ export default function InterviewCalendar() {
                   <div key={s._id} style={styles.item}>
                     <strong>{s.name}</strong>
                     <span>{s.course}</span>
-                    <small>{s?.interview?.time || "Time pending"}</small>
+                    <small style={styles.timePlatform}>
+                      {(s?.interview?.time || "Time pending")}{" "}
+                      {s?.interview?.platform ? `|| ${s.interview.platform}` : ""}
+                    </small>
                     {s?.interview?.link ? (
-                      <a href={s.interview.link} target="_blank" rel="noreferrer" style={styles.platformLink}>
-                        {s?.interview?.platform || "Open Platform"}
-                      </a>
+                      <div style={styles.linkActions}>
+                        <button type="button" style={styles.joinBtn} onClick={() => window.open(s.interview.link, "_blank", "noopener,noreferrer")}>
+                          Join
+                        </button>
+                        <button type="button" style={styles.copyBtn} onClick={() => copyInterviewLink(s.interview.link)}>
+                          Copy Link
+                        </button>
+                      </div>
                     ) : (
                       <small>{s?.interview?.platform || "Platform pending"}</small>
                     )}
@@ -134,7 +154,10 @@ const styles = {
   dateSub: { color: "var(--text-muted)" },
   list: { display: "grid", gap: "8px" },
   item: { border: "1px solid var(--border-color)", borderRadius: 8, padding: "8px", display: "grid", gap: 3, color: "var(--text-main)" },
+  timePlatform: { color: "var(--text-muted)", fontWeight: 600 },
   dayEmpty: { border: "1px dashed var(--border-color)", borderRadius: 8, padding: "10px", color: "var(--text-muted)", fontSize: "0.9rem" },
-  platformLink: { color: "#2563eb", textDecoration: "underline", fontWeight: 600, fontSize: "0.85rem", width: "fit-content" },
+  linkActions: { display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" },
+  joinBtn: { border: "1px solid #93c5fd", background: "#dbeafe", color: "#1e3a8a", borderRadius: 8, padding: "4px 8px", cursor: "pointer", fontWeight: 700, fontSize: "0.75rem" },
+  copyBtn: { border: "1px solid var(--border-color)", background: "var(--surface-card)", color: "var(--text-main)", borderRadius: 8, padding: "4px 8px", cursor: "pointer", fontWeight: 700, fontSize: "0.75rem" },
   viewBtn: { marginTop: 6, border: "1px solid #c7d2fe", background: "#eef2ff", color: "#1e3a8a", borderRadius: 8, padding: "6px 10px", cursor: "pointer", fontWeight: 700, width: "fit-content" },
 };

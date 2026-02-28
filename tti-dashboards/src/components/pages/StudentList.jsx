@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import StudentTable from "../StudentTable";
-import { getNotifications, headApproveStudent, headDeleteStudent, headRejectStudent, markAllNotificationsRead } from "../../server/Api";
+import { getDashboardData, getNotifications, headApproveStudent, headDeleteStudent, headRejectStudent, markAllNotificationsRead } from "../../server/Api";
 import { useToast } from "../ui/ToastContext";
+import GlobalFilterBar from "../ui/GlobalFilterBar";
 
 const ALL_COURSES = [
   "DBMS",
@@ -22,6 +23,7 @@ export default function StudentList({ title, fetchFn }) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [bulkLoading, setBulkLoading] = useState(false);
+  const [globalStatusCounts, setGlobalStatusCounts] = useState({});
   const toast = useToast();
   const initialOpenStudentId = searchParams.get("candidateId") || "";
   const source = searchParams.get("source") || "";
@@ -47,6 +49,12 @@ export default function StudentList({ title, fetchFn }) {
       )
       .catch(() => setRecentActivity([]));
   }, [students]);
+
+  useEffect(() => {
+    getDashboardData()
+      .then((res) => setGlobalStatusCounts(res?.data?.statusCounts || {}))
+      .catch(() => setGlobalStatusCounts({}));
+  }, []);
 
   const markRecentSeen = async () => {
     try {
@@ -116,6 +124,16 @@ export default function StudentList({ title, fetchFn }) {
 
   const totalCount = courseFilteredStudents.length;
   const shownCount = filteredStudents.length;
+  const fallbackSubmittedCount = filteredStudents.filter((s) => String(s?.status || "").toUpperCase() === "SUBMITTED").length;
+  const fallbackScheduledCount = filteredStudents.filter((s) => String(s?.status || "").toUpperCase() === "INTERVIEW_SCHEDULED").length;
+  const fallbackSelectedCount = filteredStudents.filter((s) => String(s?.status || "").toUpperCase() === "SELECTED").length;
+
+  const submittedCount = Number(globalStatusCounts?.SUBMITTED ?? fallbackSubmittedCount);
+  const scheduledCount = Number(globalStatusCounts?.INTERVIEW_SCHEDULED ?? fallbackScheduledCount);
+  const selectedCount = Number(globalStatusCounts?.SELECTED ?? fallbackSelectedCount);
+  const visibleCount = Object.keys(globalStatusCounts || {}).length
+    ? Object.values(globalStatusCounts || {}).reduce((sum, value) => sum + Number(value || 0), 0)
+    : shownCount;
 
   const toggleSelected = (id) => {
     setSelectedIds((prev) =>
@@ -174,6 +192,59 @@ export default function StudentList({ title, fetchFn }) {
           {search.trim() ? `${shownCount} / ${totalCount}` : totalCount}
         </span>
       </div>
+      <div style={styles.kpiGrid}>
+        <article style={styles.kpiCard}>
+          <p style={styles.kpiLabel}>Visible</p>
+          <strong style={styles.kpiValue}>{visibleCount}</strong>
+        </article>
+        <article style={styles.kpiCard}>
+          <p style={styles.kpiLabel}>Submitted</p>
+          <strong style={styles.kpiValue}>{submittedCount}</strong>
+        </article>
+        <article style={styles.kpiCard}>
+          <p style={styles.kpiLabel}>Interview Scheduled</p>
+          <strong style={styles.kpiValue}>{scheduledCount}</strong>
+        </article>
+        <article style={styles.kpiCard}>
+          <p style={styles.kpiLabel}>Selected</p>
+          <strong style={styles.kpiValue}>{selectedCount}</strong>
+        </article>
+      </div>
+      <GlobalFilterBar title="Student Filters">
+        <div style={styles.filtersRow}>
+          <label htmlFor="student-search" style={styles.srOnly}>Search students</label>
+          <input
+            id="student-search"
+            type="text"
+            placeholder="Search by name, email, mobile, course, status"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search students by name, email, mobile, course or status"
+            style={{
+              ...styles.searchInput,
+              ...(isHead ? styles.searchInputHead : styles.searchInputTeacher),
+            }}
+          />
+          {isHead && (
+            <>
+              <label htmlFor="course-filter" style={styles.srOnly}>Filter by course</label>
+            <select
+              id="course-filter"
+              value={selectedCourse}
+              onChange={(e) => setSelectedCourse(e.target.value)}
+              aria-label="Filter students by course"
+              style={styles.courseSelect}
+            >
+              {courseOptions.map((course) => (
+                <option key={course} value={course}>
+                  {course === "ALL" ? "ALL" : course}
+                </option>
+              ))}
+            </select>
+            </>
+          )}
+        </div>
+      </GlobalFilterBar>
       {isHead && (
         <div style={styles.bulkRow}>
           <button type="button" style={styles.bulkBtn} onClick={selectAllVisible}>Select Visible</button>
@@ -184,39 +255,6 @@ export default function StudentList({ title, fetchFn }) {
           <span style={styles.bulkCount}>{selectedIds.length} selected</span>
         </div>
       )}
-      <div style={styles.filtersRow}>
-        <label htmlFor="student-search" style={styles.srOnly}>Search students</label>
-        <input
-          id="student-search"
-          type="text"
-          placeholder="Search by name, email, mobile, course, status"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          aria-label="Search students by name, email, mobile, course or status"
-          style={{
-            ...styles.searchInput,
-            ...(isHead ? styles.searchInputHead : styles.searchInputTeacher),
-          }}
-        />
-        {isHead && (
-          <>
-            <label htmlFor="course-filter" style={styles.srOnly}>Filter by course</label>
-          <select
-            id="course-filter"
-            value={selectedCourse}
-            onChange={(e) => setSelectedCourse(e.target.value)}
-            aria-label="Filter students by course"
-            style={styles.courseSelect}
-          >
-            {courseOptions.map((course) => (
-              <option key={course} value={course}>
-                {course === "ALL" ? "ALL" : course}
-              </option>
-            ))}
-          </select>
-          </>
-        )}
-      </div>
       <div style={styles.activityCard}>
         <div style={styles.activityHeader}>
           <h4 style={styles.activityTitle}>Recent Activity</h4>
@@ -252,39 +290,67 @@ export default function StudentList({ title, fetchFn }) {
 
 const styles = {
   pageContainer: {
-    maxWidth: "1200px",
+    maxWidth: "1180px",
     margin: "0 auto",
-    padding: "2rem 1rem",
+    padding: "1.35rem 1rem 2.2rem",
   },
   pageTitle: {
-    fontSize: "2rem",
+    fontSize: "2.1rem",
     fontWeight: "700",
     textAlign: "center",
-    color: "#2c3e50",
-    marginBottom: "2rem",
+    color: "var(--text-main)",
+    marginBottom: "1.4rem",
     letterSpacing: "-0.5px",
-    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    background: "linear-gradient(135deg, #8ca3ff 0%, #8d63d6 65%, #52b3ff 100%)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     backgroundClip: "text",
     margin: 0,
+    textShadow: "0 12px 24px rgba(79,70,229,0.18)",
   },
   headerRow: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     gap: "0.75rem",
-    marginBottom: "2rem",
+    marginBottom: "1rem",
     flexWrap: "wrap",
   },
   countBadge: {
-    padding: "0.35rem 0.75rem",
+    padding: "0.42rem 0.8rem",
     borderRadius: "999px",
-    background: "#eef2ff",
-    color: "#3949ab",
+    background: "var(--surface-card)",
+    color: "#5566e0",
     fontSize: "0.9rem",
     fontWeight: "700",
-    border: "1px solid #dbe4ff",
+    border: "1px solid var(--dash-panel-border)",
+    boxShadow: "0 8px 20px rgba(15, 23, 42, 0.14)",
+  },
+  kpiGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+    gap: "12px",
+    maxWidth: "940px",
+    margin: "0 auto 14px auto",
+  },
+  kpiCard: {
+    border: "1px solid var(--dash-panel-border)",
+    background: "var(--dash-panel-bg)",
+    borderRadius: "var(--radius-md)",
+    boxShadow: "var(--shadow-sm)",
+    padding: "12px",
+    backdropFilter: "blur(2px)",
+  },
+  kpiLabel: {
+    margin: 0,
+    color: "var(--dash-muted-text)",
+    fontWeight: 700,
+    fontSize: "0.8rem",
+  },
+  kpiValue: {
+    color: "var(--dash-strong-text)",
+    fontSize: "1.35rem",
+    lineHeight: 1.2,
   },
   loadingContainer: {
     minHeight: "320px",
@@ -299,7 +365,7 @@ const styles = {
   filtersRow: {
     display: "flex",
     gap: "0.75rem",
-    margin: "0 auto 1rem auto",
+    margin: 0,
     maxWidth: "900px",
     width: "100%",
     alignItems: "center",
@@ -308,27 +374,31 @@ const styles = {
   },
   searchInput: {
     flex: "1 1 420px",
-    padding: "0.75rem 1rem",
-    border: "1px solid #ced4da",
-    borderRadius: "8px",
+    padding: "0.8rem 0.95rem",
+    border: "1px solid var(--dash-soft-border)",
+    borderRadius: "10px",
     fontSize: "0.95rem",
     outline: "none",
+    background: "var(--dash-soft-bg)",
+    color: "var(--text-main)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
   },
   searchInputHead: {
-    maxWidth: "620px",
+    maxWidth: "640px",
   },
   searchInputTeacher: {
-    maxWidth: "420px",
+    maxWidth: "500px",
     margin: "0 auto",
   },
   courseSelect: {
     flex: "0 0 220px",
-    padding: "0.75rem 1rem",
-    border: "1px solid #ced4da",
-    borderRadius: "8px",
+    padding: "0.8rem 1rem",
+    border: "1px solid var(--dash-soft-border)",
+    borderRadius: "10px",
     fontSize: "0.95rem",
     outline: "none",
-    backgroundColor: "#fff",
+    backgroundColor: "var(--dash-soft-bg)",
+    color: "var(--text-main)",
   },
   skeletonGrid: {
     display: "grid",
@@ -347,23 +417,23 @@ const styles = {
     gap: "8px",
     flexWrap: "wrap",
     justifyContent: "center",
-    marginBottom: "12px",
+    marginBottom: "14px",
   },
   bulkBtn: {
-    border: "1px solid #d0d7ee",
-    background: "#fff",
-    color: "#24324d",
-    borderRadius: "8px",
+    border: "1px solid var(--dash-soft-border)",
+    background: "var(--surface-card)",
+    color: "var(--text-main)",
+    borderRadius: "10px",
     padding: "8px 10px",
     cursor: "pointer",
     fontWeight: 700,
     fontSize: "12px",
   },
   bulkDangerBtn: {
-    border: "1px solid #ef9a9a",
-    background: "#ffebee",
-    color: "#b71c1c",
-    borderRadius: "8px",
+    border: "1px solid var(--dash-danger-border)",
+    background: "var(--dash-danger-bg)",
+    color: "var(--dash-danger-text)",
+    borderRadius: "10px",
     padding: "8px 10px",
     cursor: "pointer",
     fontWeight: 700,
@@ -372,19 +442,20 @@ const styles = {
   bulkCount: {
     alignSelf: "center",
     fontWeight: 700,
-    color: "#3949ab",
+    color: "#8fa2ff",
   },
   activityCard: {
-    maxWidth: "900px",
-    margin: "0 auto 12px auto",
-    border: "1px solid var(--border-color)",
-    background: "var(--surface-card)",
-    borderRadius: "10px",
-    padding: "10px",
+    maxWidth: "940px",
+    margin: "0 auto 14px auto",
+    border: "1px solid var(--dash-panel-border)",
+    background: "var(--dash-panel-bg)",
+    borderRadius: "12px",
+    padding: "12px",
   },
   activityTitle: {
     margin: 0,
-    color: "var(--text-main)",
+    color: "var(--dash-strong-text)",
+    fontSize: "1.18rem",
   },
   activityHeader: {
     display: "flex",
@@ -394,10 +465,10 @@ const styles = {
     gap: "8px",
   },
   activityActionBtn: {
-    border: "1px solid #d0d7ee",
-    background: "#fff",
-    color: "#334155",
-    borderRadius: "8px",
+    border: "1px solid var(--dash-soft-border)",
+    background: "var(--surface-card)",
+    color: "var(--text-main)",
+    borderRadius: "10px",
     padding: "6px 10px",
     cursor: "pointer",
     fontWeight: 700,
@@ -415,12 +486,13 @@ const styles = {
     gap: "6px",
   },
   activityItem: {
-    border: "1px solid var(--border-color)",
-    borderRadius: "8px",
-    padding: "8px",
+    border: "1px solid var(--dash-soft-border)",
+    borderRadius: "10px",
+    padding: "10px",
     display: "grid",
-    gap: "3px",
-    color: "var(--text-main)",
+    gap: "5px",
+    color: "var(--dash-strong-text)",
+    background: "var(--dash-soft-bg)",
   },
   srOnly: {
     border: 0,

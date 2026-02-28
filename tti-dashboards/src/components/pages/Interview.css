@@ -3,7 +3,9 @@
   margin: 50px auto;
   padding: 35px;
   border-radius: 16px;
-  background: #ffffff;
+  background: var(--surface-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   font-family: Arial, sans-serif;
 }
@@ -11,7 +13,7 @@
 .interview-title {
   text-align: center;
   margin-bottom: 25px;
-  color: #020eaf;
+  color: var(--text-main);
   font-weight: 700;
 }
 
@@ -30,7 +32,9 @@
 .form-group select {
   padding: 10px;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
+  background: var(--surface-card);
+  color: var(--text-main);
   font-size: 14px;
   transition: 0.3s;
 }
@@ -40,6 +44,13 @@
   border-color: #020eaf;
   outline: none;
   box-shadow: 0 0 5px rgba(2,14,175,0.2);
+}
+
+.field-error {
+  margin-top: 5px;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .submit-btn {
@@ -73,4 +84,12 @@
   .interview-title {
     font-size: 20px;
   }
-} 
+}
+
+@media (max-width: 420px) {
+  .interview-container {
+    margin: 12px 8px;
+    padding: 16px;
+    border-radius: 12px;
+  }
+}

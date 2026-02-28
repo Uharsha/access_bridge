@@ -243,22 +243,24 @@ form {
 
 .form-wrapper.theme-light .submit-btn {
   background: linear-gradient(
-    120deg,
-    #ffd43b 0%,
-    #ffe777 22%,
-    #7b4bc2 46%,
-    #5a2c91 68%,
-    #ffd43b 100%
+    130deg,
+    #ffe36b 0%,
+    #ffd43b 24%,
+    #b57bff 52%,
+    #7b4bc2 76%,
+    #ffe36b 100%
   );
-  background-size: 320% 320%;
+  background-size: 360% 360%;
   box-shadow: 0 10px 24px rgba(90, 44, 145, 0.3);
-  color: #2b124c !important;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
-  animation: lightBtnFlow 2.6s linear infinite;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: box-shadow 0.35s ease, transform 0.35s ease, filter 0.35s ease;
+  animation: lightBtnFlow 4.2s ease-in-out infinite;
 }
 
 .form-wrapper.theme-light .submit-btn:hover {
   box-shadow: 0 16px 40px rgba(90, 44, 145, 0.42);
+  filter: saturate(1.08);
 }
 
 .form-wrapper.theme-light .form-buttons-wrapper a {
@@ -1599,8 +1601,9 @@ input[type="checkbox"]:checked {
 }
 
 .form-buttons-wrapper.form-buttons-single .submit-btn {
-  flex: 0 1 auto;
-  width: min(100%, 360px) !important;
+  flex: 1 1 100%;
+  width: 100% !important;
+  max-width: 100%;
   margin: 0 auto !important;
   display: block;
 }
@@ -1902,8 +1905,9 @@ form h2 {
   }
 
   .form-buttons-wrapper.form-buttons-single .submit-btn {
-    width: min(100%, 320px) !important;
-    flex: 0 1 auto;
+    width: 100% !important;
+    max-width: 100%;
+    flex: 1 1 100%;
   }
 }
 

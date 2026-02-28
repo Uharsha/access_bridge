@@ -150,6 +150,15 @@ function Navbar() {
             { to: "/teacher-dashboard/audit-logs", label: "Audit Logs" },
           ]
         : [];
+  const auditCount = notifications.filter((n) => {
+    const type = String(n?.type || "").toUpperCase();
+    return type.includes("INTERVIEW") || type.includes("REJECT") || type.includes("SELECT") || type.includes("HEAD");
+  }).length;
+  const getLinkBadgeCount = (label) => {
+    if (label === "Notifications") return unreadCount;
+    if (label === "Audit Logs") return auditCount;
+    return 0;
+  };
   const getCompactName = (value) => {
     const clean = String(value || "").trim().replace(/\s+/g, " ");
     if (!clean) return "";
@@ -206,6 +215,9 @@ function Navbar() {
                   {roleLinks.map((item) => (
                     <NavLink key={item.to} to={item.to}>
                       {item.label}
+                      {getLinkBadgeCount(item.label) > 0 && (
+                        <span className="route-badge">{getLinkBadgeCount(item.label) > 99 ? "99+" : getLinkBadgeCount(item.label)}</span>
+                      )}
                     </NavLink>
                   ))}
                 </div>
@@ -289,6 +301,9 @@ function Navbar() {
               {roleLinks.map((item) => (
                 <NavLink key={item.to} to={item.to} onClick={closeMobileMenu}>
                   {item.label}
+                  {getLinkBadgeCount(item.label) > 0 && (
+                    <span className="route-badge">{getLinkBadgeCount(item.label) > 99 ? "99+" : getLinkBadgeCount(item.label)}</span>
+                  )}
                 </NavLink>
               ))}
               <button type="button" onClick={handleLogout} className="drawer-logout">

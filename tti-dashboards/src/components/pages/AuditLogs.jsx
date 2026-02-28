@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getNotifications } from "../../server/Api";
+import GlobalFilterBar from "../ui/GlobalFilterBar";
 
 export default function AuditLogs() {
   const [loading, setLoading] = useState(true);
@@ -21,10 +22,34 @@ export default function AuditLogs() {
       .finally(() => setLoading(false));
   }, [windowDays]);
 
+  const exportCsv = () => {
+    const header = ["Time", "Type", "Message", "Actor", "Role"];
+    const lines = rows.map((row) => [
+      new Date(row.createdAt).toLocaleString(),
+      row.type || "EVENT",
+      row.message || "",
+      row?.createdBy?.name || "System",
+      row?.createdBy?.role || "SYSTEM",
+    ]);
+    const csv = [header, ...lines]
+      .map((cols) => cols.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `audit-logs-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div style={styles.wrap}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>Audit Log Panel</h2>
+      <div style={styles.header}><h2 style={styles.title}>Audit Log Panel</h2></div>
+      <GlobalFilterBar
+        title="Audit Filters"
+        rightSlot={<button type="button" style={styles.exportBtn} onClick={exportCsv}>Export CSV</button>}
+      >
         <select
           value={windowDays}
           onChange={(e) => setWindowDays(e.target.value)}
@@ -35,7 +60,7 @@ export default function AuditLogs() {
           <option value="30">Last 30 days</option>
           <option value="all">All time</option>
         </select>
-      </div>
+      </GlobalFilterBar>
       {loading ? (
         <p style={styles.muted}>Loading logs...</p>
       ) : isCompact ? (
@@ -45,6 +70,7 @@ export default function AuditLogs() {
             <article key={row._id} style={styles.logCard}>
               <p style={styles.logLine}><strong>Time:</strong> {new Date(row.createdAt).toLocaleString()}</p>
               <p style={styles.logLine}><strong>Type:</strong> {row.type || "EVENT"}</p>
+              <p style={styles.logLine}><strong>Actor:</strong> {row?.createdBy?.name || "System"} <span style={styles.roleBadge}>{row?.createdBy?.role || "SYSTEM"}</span></p>
               <p style={styles.logLine}><strong>Message:</strong> {row.message} {row?.createdBy?.name ? `(${row.createdBy.name})` : ""}</p>
             </article>
           ))}
@@ -67,7 +93,12 @@ export default function AuditLogs() {
                 <tr key={row._id}>
                   <td>{new Date(row.createdAt).toLocaleString()}</td>
                   <td>{row.type || "EVENT"}</td>
-                  <td>{row.message} {row?.createdBy?.name ? `(${row.createdBy.name})` : ""}</td>
+                  <td>
+                    <div>{row.message}</div>
+                    <small style={styles.metaLine}>
+                      {row?.createdBy?.name || "System"} <span style={styles.roleBadge}>{row?.createdBy?.role || "SYSTEM"}</span>
+                    </small>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -83,10 +114,13 @@ const styles = {
   header: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", marginBottom: "1rem", flexWrap: "wrap" },
   title: { margin: "0 0 1rem", color: "var(--text-main)" },
   select: { border: "1px solid var(--border-color)", background: "var(--surface-card)", color: "var(--text-main)", borderRadius: 8, padding: "8px 10px", fontWeight: 600, cursor: "pointer" },
+  exportBtn: { border: "1px solid var(--border-color)", background: "var(--surface-card)", color: "var(--text-main)", borderRadius: 8, padding: "8px 12px", fontWeight: 700, cursor: "pointer" },
   muted: { color: "var(--text-muted)" },
   tableWrap: { overflowX: "auto", border: "1px solid var(--border-color)", borderRadius: 12, background: "var(--surface-card)" },
   table: { width: "100%", borderCollapse: "collapse", color: "var(--text-main)" },
   empty: { textAlign: "center", padding: "16px", color: "var(--text-muted)" },
+  metaLine: { color: "var(--text-muted)" },
+  roleBadge: { display: "inline-block", marginLeft: 6, padding: "2px 6px", borderRadius: 999, border: "1px solid var(--border-color)", fontSize: 11, fontWeight: 700 },
   cardList: { display: "grid", gap: "10px" },
   logCard: { border: "1px solid var(--border-color)", borderRadius: 10, background: "var(--surface-card)", padding: "10px" },
   logLine: { margin: "0 0 6px", color: "var(--text-main)", lineHeight: 1.35, wordBreak: "break-word" },

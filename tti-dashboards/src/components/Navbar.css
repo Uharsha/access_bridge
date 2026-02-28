@@ -24,6 +24,9 @@
   font-weight: 800;
   margin: 0;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: min(40vw, 360px);
 }
 
 .nav-links {
@@ -51,6 +54,10 @@
   scrollbar-width: thin;
 }
 
+.desktop-link-scroll::-webkit-scrollbar {
+  height: 5px;
+}
+
 .desktop-right-actions {
   display: inline-flex;
   align-items: center;
@@ -68,6 +75,9 @@
   border-radius: 6px;
   transition: 0.3s;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .nav-links a.active {
@@ -389,6 +399,10 @@
   font-size: 0.95rem;
   padding: 0.6rem 0.65rem;
   border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .drawer-links a.active {
@@ -404,6 +418,19 @@
   padding: 0.65rem 0.75rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.route-badge {
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(255, 77, 79, 0.95);
+  color: #fff;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  font-weight: 700;
+  padding: 0 4px;
 }
 
 @media (max-width: 992px) {
@@ -442,6 +469,10 @@
     padding-top: 8px;
     padding-bottom: 8px;
   }
+
+  .navbar-container {
+    min-height: 52px;
+  }
 }
 
 @media (max-width: 420px) {
@@ -459,7 +490,7 @@
   }
 
   .mobile-theme-btn {
-    width: 56px;
+    width: 54px;
     height: 30px;
   }
 
@@ -482,12 +513,46 @@
   }
 
   .theme-switch-track.dark .theme-switch-thumb {
-    transform: translateX(31px);
+    transform: translateX(30px);
   }
 
   .mobile-drawer {
     width: 100vw;
     border-radius: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .navbar-title {
+    font-size: 0.96rem;
+    max-width: calc(100vw - 128px);
+  }
+
+  .mobile-actions {
+    gap: 0.25rem;
+  }
+
+  .mobile-theme-btn {
+    width: 50px;
+    height: 28px;
+  }
+
+  .hamburger-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .theme-switch-icon {
+    font-size: 11px;
+  }
+
+  .theme-switch-thumb {
+    width: 16px;
+    height: 20px;
+  }
+
+  .theme-switch-track.dark .theme-switch-thumb {
+    transform: translateX(28px);
   }
 }
 
