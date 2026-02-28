@@ -408,26 +408,15 @@ const handleChange = (e) => {
               className="rules-link"
               onClick={(e) => e.stopPropagation()}
               >
-              Read the Rules and Regulations
+              ⚠️ Read the Rules and Regulations
             </Link>{" "}
             before submitting the form.
           <br />
           </div>
         </div>
 
-        <div className="form-buttons-wrapper">
-          <Link
-            to="/"
-            className="submit-btn desc-btn"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              textDecoration: "none",
-            }}
-          >
-            Description
-          </Link>
+        <div className="form-buttons-wrapper form-buttons-single">
+
 
           <button
             type="submit"

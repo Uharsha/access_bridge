@@ -1594,6 +1594,17 @@ input[type="checkbox"]:checked {
   margin-top: 20px;
 }
 
+.form-buttons-wrapper.form-buttons-single {
+  justify-content: center;
+}
+
+.form-buttons-wrapper.form-buttons-single .submit-btn {
+  flex: 0 1 auto;
+  width: min(100%, 360px) !important;
+  margin: 0 auto !important;
+  display: block;
+}
+
 .form-buttons-wrapper a,
 .form-buttons-wrapper .submit-btn {
   flex: 1;
@@ -1888,6 +1899,11 @@ form h2 {
     padding: 12px 10px;
     font-size: 13px;
     text-align: center;
+  }
+
+  .form-buttons-wrapper.form-buttons-single .submit-btn {
+    width: min(100%, 320px) !important;
+    flex: 0 1 auto;
   }
 }
 
