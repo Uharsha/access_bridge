@@ -8,12 +8,7 @@ const { allowRoles, requireAuth } = require("../middleware/auth");
 const { uploadFile } = require("../utils/cloudinary");
 const { sendMail, templates } = require("../utils/mailer");
 const env = require("../config/env");
-let teachersByCourse = {};
-try {
-  teachersByCourse = require("../utils/teacher");
-} catch (_err) {
-  teachersByCourse = require("../config/teachers");
-}
+const teachersByCourse = require("../utils/teacher");
 
 const router = express.Router();
 
